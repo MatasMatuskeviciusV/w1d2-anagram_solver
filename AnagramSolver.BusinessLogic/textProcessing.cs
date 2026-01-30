@@ -8,14 +8,14 @@ using AnagramSolver.Contracts;
 
 namespace AnagramSolver.BusinessLogic
 {
-    public class textProcessing : IWordRepository
+    public class TextProcessing : IWordRepository
     {
         private string _filePath;
         private List<string> _lines = new();
         private HashSet<string> _distinctWords = new();
         private Dictionary<string, List<string>> _anagramMap = new();
 
-        public textProcessing(string filePath)
+        public TextProcessing(string filePath)
         {
             _filePath = filePath;
         }

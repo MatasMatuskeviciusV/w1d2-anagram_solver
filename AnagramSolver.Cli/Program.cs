@@ -20,7 +20,7 @@ namespace AnagramSolver.Cli
 
             string dictPath = @"C:\Users\matas.matuskevicius\source\repos\Anagram_2.1\AnagramSolver\zodynas.txt";
 
-            var textProcessing = new textProcessing(dictPath);
+            var textProcessing = new TextProcessing(dictPath);
 
             IWordRepository wordRepository = textProcessing;
 
@@ -32,7 +32,7 @@ namespace AnagramSolver.Cli
             Console.WriteLine("Enter words: ");
             string input = Console.ReadLine();
 
-            var userProcessing = new userProcessing(input);
+            var userProcessing = new UserProcessing(input);
             var words = userProcessing.GetWords();
 
             foreach(var word in words)
@@ -47,7 +47,7 @@ namespace AnagramSolver.Cli
 
             var sortedLetters = userProcessing.GetSortedLetters(words);
 
-            var anagramProcessing = new anagramProcessing(anagramMap, _maxResults);
+            var anagramProcessing = new AnagramProcessing(anagramMap, _maxResults);
             var results = anagramProcessing.GetAnagrams(sortedLetters);
 
             if(results.Count == 0)

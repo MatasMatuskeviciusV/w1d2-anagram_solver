@@ -7,12 +7,12 @@ using AnagramSolver.Contracts;
 
 namespace AnagramSolver.BusinessLogic
 {
-    public class anagramProcessing : IAnagramSolver
+    public class AnagramProcessing : IAnagramSolver
     {
         private Dictionary<string, List<string>> _map;
         private int _maxResults;
 
-        public anagramProcessing(Dictionary<string, List<string>> map, int maxResults)
+        public AnagramProcessing(Dictionary<string, List<string>> map, int maxResults)
         {
             _map = map;
             _maxResults = maxResults;
@@ -21,6 +21,18 @@ namespace AnagramSolver.BusinessLogic
         public IList<string> GetAnagrams(string myWords)
         {
             var results = new List<string>();
+
+            if (_map.TryGetValue(myWords, out var singleWords))
+            {
+                foreach(var w in singleWords)
+                {
+                    results.Add(w);
+                    if(results.Count >= _maxResults)
+                    {
+                        return results;
+                    }
+                }
+            }
 
             foreach(var key1 in _map.Keys)
             {
@@ -36,22 +48,32 @@ namespace AnagramSolver.BusinessLogic
                     continue;
                 }
 
-                if (_map.ContainsKey(remaining))
+                if (!_map.TryGetValue(remaining, out var secondWords))
                 {
-                    foreach(var w1 in _map[key1])
-                    {
-                        foreach(var w2 in _map[remaining])
-                        {
-                            results.Add(w1 + " " + w2);
-                            if (results.Count >= _maxResults)
-                            {
-                                return results;
-                            }
-                        }
-                    }
+                    continue;
+                }
+
+                if(AddCombinations(_map[key1], secondWords, results, _maxResults))
+                {
+                    return results;
                 }
             }
             return results;
+        }
+
+        private bool AddCombinations(List<string> firstWords, List<string> secondWords, List<string> results, int maxResults)
+        {
+            var combos = firstWords.SelectMany(w1 => secondWords, (w1, w2) => $"{w1} {w2}");
+
+            foreach(var c in combos)
+            {
+                results.Add(c);
+                if (results.Count >= maxResults)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private string RemoveLetters(string input, string removeKey)

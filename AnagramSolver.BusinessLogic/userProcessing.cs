@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AnagramSolver.BusinessLogic
 {
-    public class userProcessing
+    public class UserProcessing
     {
         private string _input;
 
-        public userProcessing(string input)
+        public UserProcessing(string input)
         {
             _input = input;
         }
