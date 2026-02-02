@@ -10,89 +10,167 @@ namespace AnagramSolver.BusinessLogic
     public class AnagramProcessing : IAnagramSolver
     {
         private Dictionary<string, List<string>> _map;
-        private int _maxResults;
+        private readonly int _maxResults;
+        private readonly int _anagramOutput;
 
-        public AnagramProcessing(Dictionary<string, List<string>> map, int maxResults)
+        private Dictionary<string, int[]> _keyCounts = new();
+        private int _alphabetSize;
+        private Dictionary<char, int> _charIndex = new();
+        private List<string> _keys;
+
+        public AnagramProcessing(Dictionary<string, List<string>> map, int maxResults, int anagramOutput)
         {
             _map = map;
             _maxResults = maxResults;
+            _anagramOutput = anagramOutput;
         }
+
 
         public IList<string> GetAnagrams(string myWords)
         {
             var results = new List<string>();
 
-            if (_map.TryGetValue(myWords, out var singleWords))
+            BuildAlphabet(myWords);
+
+            _keyCounts.Clear();
+
+            _keys = _map.Keys.ToList();
+
+            foreach (var key in _keys)
             {
-                foreach(var w in singleWords)
-                {
-                    results.Add(w);
-                    if(results.Count >= _maxResults)
-                    {
-                        return results;
-                    }
-                }
+                _keyCounts[key] = BuildCounts(key);
             }
 
-            foreach(var key1 in _map.Keys)
+            var inputCounts = BuildCounts(myWords);
+
+            for(int target = 1; target <= _anagramOutput; target++)
             {
-                if(key1.Length > myWords.Length)
-                {
-                    continue;
-                }
+                var current = new List<string>();
+                SearchExact(inputCounts, myWords.Length, current, results, target);
 
-                string remaining = RemoveLetters(myWords, key1);
-
-                if(remaining == null)
-                {
-                    continue;
-                }
-
-                if (!_map.TryGetValue(remaining, out var secondWords))
-                {
-                    continue;
-                }
-
-                if(AddCombinations(_map[key1], secondWords, results, _maxResults))
+                if(results.Count >= _maxResults)
                 {
                     return results;
                 }
             }
+
             return results;
         }
 
-        private bool AddCombinations(List<string> firstWords, List<string> secondWords, List<string> results, int maxResults)
+        private void SearchExact(int[] remainingCounts, int remainingLetters, List<string> currentWords, List<string> results, int target)
         {
-            var combos = firstWords.SelectMany(w1 => secondWords, (w1, w2) => $"{w1} {w2}");
-
-            foreach(var c in combos)
+            if (results.Count >= _maxResults)
             {
-                results.Add(c);
-                if (results.Count >= maxResults)
-                {
-                    return true;
-                }
+                return;
             }
-            return false;
-        }
 
-        private string RemoveLetters(string input, string removeKey)
-        {
-            string used = input;
-
-            foreach(char c in removeKey)
+            if (remainingLetters == 0)
             {
-                int Index = used.IndexOf(c);
-                if(Index == -1)
+                if (currentWords.Count == target)
                 {
-                    return null;
+                    results.Add(string.Join(" ", currentWords));
                 }
 
-                used = used.Remove(Index, 1);
+                return;
             }
-            return used;
+
+            if(currentWords.Count >= target)
+            {
+                return;
+            }
+
+            foreach (var key in _keys)
+            {
+                if (key.Length > remainingLetters)
+                {
+                    continue;
+                }
+
+                if (!CanSubtract(remainingCounts, _keyCounts[key]))
+                {
+                    continue;
+                }
+
+                var newRemaining = Subtract(remainingCounts, _keyCounts[key]);
+
+                foreach (var w in _map[key])
+                {
+                    currentWords.Add(w);
+                    SearchExact(newRemaining, remainingLetters - key.Length, currentWords, results, target);
+                    currentWords.RemoveAt(currentWords.Count - 1);
+
+                    if(results.Count >= _maxResults)
+                    {
+                        return;
+                    }
+                }
+            }
+        }  
+
+        private void BuildAlphabet(string userInput)
+        {
+            _charIndex.Clear();
+
+            var set = new HashSet<char>();
+
+            foreach(var key in _map.Keys)
+            {
+                foreach (var c in key)
+                {
+                    set.Add(c);
+                }
+            }
+
+            foreach (var c in userInput)
+            {
+                set.Add(c);
+            }
+
+            int index = 0;
+
+            foreach(var c in set)
+            {
+                _charIndex[c] = index++;
+            }
+
+            _alphabetSize = index;
         }
 
+        private int[] BuildCounts(string s)
+        {
+            var counts = new int[_alphabetSize];
+
+            foreach (char c in s)
+            {
+                counts[_charIndex[c]]++;
+            }
+            return counts;
+        }
+
+        private bool CanSubtract(int[] remaining, int[] remove)
+        {
+            for(int i = 0; i < remaining.Length; i++)
+            {
+                if (remove[i] > remaining[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private int[] Subtract(int[] remaining, int[] remove)
+        {
+            var result = new int[remaining.Length];
+            
+            for(int i = 0; i < remaining.Length; i++)
+            {
+                result[i] = remaining[i] - remove[i];
+            }
+
+            return result;
+        }
 
     }
 }

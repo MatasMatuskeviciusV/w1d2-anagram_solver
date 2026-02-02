@@ -17,7 +17,7 @@ namespace AnagramSolver.BusinessLogic
 
         public List<string> GetWords()
         {
-            return _input.ToLower().Split(' ').ToList();
+            return _input.ToLower().Split(' ', '\t',StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
         public string CombineLetters(List<string> words)
@@ -33,6 +33,6 @@ namespace AnagramSolver.BusinessLogic
             Array.Sort(arr);
 
             return new string(arr);
-        }
+        } 
     }
 }

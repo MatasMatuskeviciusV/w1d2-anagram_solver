@@ -14,13 +14,16 @@ namespace AnagramSolver.Cli
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
 
-            var configuration = new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory).AddJsonFile("appsettings.json").Build();
-            int _minLength = int.Parse(configuration["minLength"]);
-            int _maxResults = int.Parse(configuration["maxResults"]);
-
             string dictPath = @"C:\Users\matas.matuskevicius\source\repos\Anagram_2.1\AnagramSolver\zodynas.txt";
+            string appSettingsPath = @"C:\Users\matas.matuskevicius\source\repos\Anagram_2.1\AnagramSolver";
 
-            var textProcessing = new TextProcessing(dictPath);
+            var configuration = new ConfigurationBuilder().SetBasePath(appSettingsPath).AddJsonFile("appsettings.json").Build();
+            int _minLength = int.Parse(configuration["minUserInputLength"]);
+            int _maxResults = int.Parse(configuration["maxResults"]);
+            int _anagramOutput = int.Parse(configuration["anagramOutput"]);
+            int _maxTxtLength = int.Parse(configuration["minTxtInputLength"]);
+
+            var textProcessing = new TextProcessing(dictPath, _maxTxtLength);
 
             IWordRepository wordRepository = textProcessing;
 
@@ -39,7 +42,7 @@ namespace AnagramSolver.Cli
             {
                 if(word.Length < _minLength)
                 {
-                    Console.WriteLine($"{word} is too short. Min length is {_minLength}.");
+                    Console.WriteLine($"Your word is too short. Min length is {_minLength}.");
                     return;
 
                 }
@@ -47,7 +50,7 @@ namespace AnagramSolver.Cli
 
             var sortedLetters = userProcessing.GetSortedLetters(words);
 
-            var anagramProcessing = new AnagramProcessing(anagramMap, _maxResults);
+            var anagramProcessing = new AnagramProcessing(anagramMap, _maxResults, _anagramOutput);
             var results = anagramProcessing.GetAnagrams(sortedLetters);
 
             if(results.Count == 0)

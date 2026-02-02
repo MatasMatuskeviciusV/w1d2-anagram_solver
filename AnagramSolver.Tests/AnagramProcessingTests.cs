@@ -4,7 +4,7 @@ using Xunit;
 using System.Collections.Generic;
 using FluentAssertions;
 
-namespace AnagramSolver.Tests
+namespace AnagramSolver.BusinessLogic.Tests
 {
     public class AnagramProcessingTests
     {
@@ -19,7 +19,9 @@ namespace AnagramSolver.Tests
 
             int maxResults = 10;
 
-            var solver = new AnagramProcessing(map, maxResults);
+            int anagramOutput = 2;
+
+            var solver = new AnagramProcessing(map, maxResults, anagramOutput);
 
             var input = "aaaiikkmprstv";
 
@@ -40,7 +42,9 @@ namespace AnagramSolver.Tests
 
             int maxResults = 10;
 
-            var solver = new AnagramProcessing(map, maxResults);
+            int anagramOutput = 1;
+
+            var solver = new AnagramProcessing(map, maxResults, anagramOutput);
 
             var input = "aimsv";
 
@@ -56,7 +60,9 @@ namespace AnagramSolver.Tests
 
             int maxResults = 10;
 
-            var solver = new AnagramProcessing(map, maxResults);
+            int anagramOutput = 10;
+
+            var solver = new AnagramProcessing(map, maxResults, anagramOutput);
 
             var input = "";
 
@@ -71,13 +77,35 @@ namespace AnagramSolver.Tests
 
             int maxResults = 10;
 
-            var solver = new AnagramProcessing(map, maxResults);
+            int anagramOutput = 10;
+
+            var solver = new AnagramProcessing(map, maxResults, anagramOutput);
 
             var input = "aaaaaaaaaaaaaaaaaaaa";
 
             var results = solver.GetAnagrams(input);
 
             results.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GetAnagrams_WhenMoreThanMaxResults_ShouldReturnMaxResults()
+        {
+            var map = new Dictionary<string, List<string>>
+            {
+                ["abc"] = new List<string> { "bca", "cab", "bac" },
+                ["def"] = new List<string> { "fed", "edf", "efd"}
+            };
+            int maxResults = 2;
+            int anagramOutput = 2;
+
+            var solver = new AnagramProcessing(map, maxResults, anagramOutput);
+
+            var input = "abcdef";
+
+            var results = solver.GetAnagrams(input);
+
+            results.Count.Should().BeLessThanOrEqualTo(maxResults);
         }
 
     }

@@ -11,16 +11,18 @@ namespace AnagramSolver.BusinessLogic
     public class TextProcessing : IWordRepository
     {
         private string _filePath;
+        private int _minTxtLength;
         private List<string> _lines = new();
         private HashSet<string> _distinctWords = new();
         private Dictionary<string, List<string>> _anagramMap = new();
 
-        public TextProcessing(string filePath)
+        public TextProcessing(string filePath, int minTxtLength)
         {
             _filePath = filePath;
+            _minTxtLength = minTxtLength;
         }
 
-        int mintxtlength = 4;
+     
         public void Reading()
         {
             _lines = File.ReadAllLines(_filePath, Encoding.UTF8).ToList();
@@ -29,10 +31,11 @@ namespace AnagramSolver.BusinessLogic
             foreach (var line in _lines)
             {
                 var word = line.Trim().ToLower();
-                if(word.Length < mintxtlength)
+                if(word.Length < _minTxtLength)
                 {
                     continue;
                 }
+                
                 _distinctWords.Add(word);
             }
         }
@@ -53,8 +56,13 @@ namespace AnagramSolver.BusinessLogic
         { 
            _anagramMap.Clear();
 
-            foreach(var word in _distinctWords)
+            foreach(var word in words)
             {
+                if (word.Length < _minTxtLength)
+                {
+                    continue;
+                }
+
                 var key = SortLetters(word);
 
                 if (!_anagramMap.ContainsKey(key))
